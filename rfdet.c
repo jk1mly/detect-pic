@@ -173,22 +173,28 @@ void pwm_write (uint8_t val)
 	if(val > 160){
 		val = 160;
 	}
-	if (val >= 64) {			//128- R only
+	if (val >= 64) {			//R only
 //			CCPR1L = 255;
 //			CCPR2L = (uint8_t)(255 - (96 -(val - 128)*3) );
+//			CCPR1L = 1;
+//			CCPR2L = (uint8_t)((val-64)*2 + 32);
 			CCPR1L = 1;
-			CCPR2L = (uint8_t)((val-64)*2 + 32);
-	} else if (val >= 16) {		//32-127 R+G
+			CCPR2L = (uint8_t)((val-64)*2 + 50);
+	} else if (val >= 16) {		// R+G
 //			CCPR1L = (uint8_t)(255 - (128 + val) );
 //			CCPR2L = (uint8_t)(255 - (255 -(val - 32)) );
-			CCPR1L = (uint8_t)(64 - val*2);
-			CCPR2L = (uint8_t)((val - 15)*2);
-	} else if (val >= 1 ) {		//1-31 G only
+//			CCPR1L = (uint8_t)(64 - val*2);
+//			CCPR2L = (uint8_t)((val - 15)*2);
+			CCPR1L = 18;
+			CCPR2L = (uint8_t)(val - 14);
+	} else if (val >= 1 ) {		//G only
 //			CCPR1L = (uint8_t)(255 - ((32 - val)*2 - 64));
 //			CCPR2L = 255;
+//			CCPR1L = (uint8_t)(val + 2);
+//			CCPR2L = 1;
 			CCPR1L = (uint8_t)(val + 2);
 			CCPR2L = 1;
-	} else {					//0 light Off
+	} else {					// Off
 		    CCPR1L = 1;
 		    CCPR2L = 1;
 	}
