@@ -56,11 +56,13 @@
  * PB2/ADC1: DET   input  (Pin 7)
 */
 
-#define G_LT LATA2=1 
-#define G_DK LATA2=0  
-#define R_LT LATA0=1 
-#define R_DK LATA0=0
+#define G_LT LATA0=1 
+#define G_DK LATA0=0  
+#define R_LT LATA2=1 
+#define R_DK LATA2=0
 #define T_SW RA3
+#define G_PW CCPR2L 
+#define R_PW CCPR1L  
 
 #define BLNK 400
 #define CAL0 4
@@ -101,25 +103,14 @@ void pwm_init(void) {
 
 uint8_t adc_read(void)
 {
-//	uint16_t temp;
 	uint16_t det;
 	uint8_t ret;
     det = 0;
-/*    
-    for (uint8_t i = 0; i < 7; i++){
-        GO_nDONE = 1;
-        while(GO_nDONE) ;
-        temp = ADRESH;
-        temp = ( temp << 8 ) | ADRESL;
-        det = det + temp;
-    }
-*/
-        GO_nDONE = 1;
-        while(GO_nDONE) ;
-        det = ADRESH;
-        det = ( det << 8 ) | ADRESL;
+    GO_nDONE = 1;
+    while(GO_nDONE) ;
+    det = ADRESH;
+    det = ( det << 8 ) | ADRESL;
     
-//  ret =  (uint8_t)(det >> 5);
     ret =  (uint8_t)(det >> 2);
     return (ret);    
 }
@@ -165,38 +156,21 @@ uint8_t opamp_cal (void)
 
 void pwm_write (uint8_t val)
 {
-/*
-	if(val > 160){
-		val = 160;
-	}
-*/	
 	if(val > 160){
 		val = 160;
 	}
 	if (val >= 64) {			//R only
-//			CCPR1L = 255;
-//			CCPR2L = (uint8_t)(255 - (96 -(val - 128)*3) );
-//			CCPR1L = 1;
-//			CCPR2L = (uint8_t)((val-64)*2 + 32);
-			CCPR1L = 1;
-			CCPR2L = (uint8_t)((val-64)*2 + 50);
+			G_PW = 1;
+			R_PW = (uint8_t)((val-64)*2 + 50);
 	} else if (val >= 16) {		// R+G
-//			CCPR1L = (uint8_t)(255 - (128 + val) );
-//			CCPR2L = (uint8_t)(255 - (255 -(val - 32)) );
-//			CCPR1L = (uint8_t)(64 - val*2);
-//			CCPR2L = (uint8_t)((val - 15)*2);
-			CCPR1L = 18;
-			CCPR2L = (uint8_t)(val - 14);
+			G_PW = 10;
+			R_PW = (uint8_t)(val - 14);
 	} else if (val >= 1 ) {		//G only
-//			CCPR1L = (uint8_t)(255 - ((32 - val)*2 - 64));
-//			CCPR2L = 255;
-//			CCPR1L = (uint8_t)(val + 2);
-//			CCPR2L = 1;
-			CCPR1L = (uint8_t)(val + 2);
-			CCPR2L = 1;
+			G_PW = (uint8_t)(val + 2);
+			R_PW = 1;
 	} else {					// Off
-		    CCPR1L = 1;
-		    CCPR2L = 1;
+		    G_PW = 1;
+		    R_PW = 1;
 	}
 }
  
